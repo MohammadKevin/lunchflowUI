@@ -67,6 +67,8 @@ export default function LoginPage() {
         JSON.stringify(data.user),
       )
 
+      document.cookie = `accessToken=${data.accessToken}; path=/`
+
       toast.success(
         'Login berhasil',
       )
