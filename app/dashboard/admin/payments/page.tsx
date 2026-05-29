@@ -8,25 +8,15 @@ import { api } from '@/lib/api'
 
 type Payment = {
   id: string
-
   paymentMethod: string
-
   paymentStatus: string
-
   paymentProof: string | null
-
   createdAt: string
-
   paidAt: string | null
 
   order: {
     orderCode: string
-
     totalPrice: number
-
-    user: {
-      fullName: string
-    }
   }
 }
 
@@ -59,34 +49,6 @@ export default function PaymentsPage() {
     fetchPayments()
   }, [])
 
-  const updatePaymentStatus =
-    async (
-      id: string,
-      status: string,
-    ) => {
-      try {
-        await api.patch(
-          `/payments/${id}/status`,
-          {
-            paymentStatus:
-              status,
-          },
-        )
-
-        toast.success(
-          'Payment updated successfully',
-        )
-
-        fetchPayments()
-      } catch (error) {
-        console.log(error)
-
-        toast.error(
-          'Failed to update payment',
-        )
-      }
-    }
-
   if (isLoading) {
     return (
       <div className="flex h-[70vh] items-center justify-center">
@@ -112,15 +74,11 @@ export default function PaymentsPage() {
 
       <div className="overflow-hidden rounded-3xl bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[800px]">
             <thead className="border-b bg-gray-50">
               <tr className="text-left text-sm text-gray-500">
                 <th className="px-6 py-4">
                   Order
-                </th>
-
-                <th className="px-6 py-4">
-                  Customer
                 </th>
 
                 <th className="px-6 py-4">
@@ -142,10 +100,6 @@ export default function PaymentsPage() {
                 <th className="px-6 py-4">
                   Created At
                 </th>
-
-                <th className="px-6 py-4">
-                  Actions
-                </th>
               </tr>
             </thead>
 
@@ -160,14 +114,6 @@ export default function PaymentsPage() {
                       {
                         payment.order
                           ?.orderCode
-                      }
-                    </td>
-
-                    <td className="px-6 py-4 text-gray-600">
-                      {
-                        payment.order
-                          ?.user
-                          ?.fullName
                       }
                     </td>
 
@@ -202,7 +148,9 @@ export default function PaymentsPage() {
                       {Number(
                         payment.order
                           ?.totalPrice,
-                      ).toLocaleString()}
+                      ).toLocaleString(
+                        'id-ID',
+                      )}
                     </td>
 
                     <td className="px-6 py-4">
@@ -212,6 +160,7 @@ export default function PaymentsPage() {
                             payment.paymentProof
                           }
                           target="_blank"
+                          rel="noopener noreferrer"
                           className="text-sm font-medium text-orange-500 hover:underline"
                         >
                           View Proof
@@ -226,35 +175,9 @@ export default function PaymentsPage() {
                     <td className="px-6 py-4 text-gray-600">
                       {new Date(
                         payment.createdAt,
-                      ).toLocaleDateString()}
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          onClick={() =>
-                            updatePaymentStatus(
-                              payment.id,
-                              'PAID',
-                            )
-                          }
-                          className="rounded-xl bg-green-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-green-600"
-                        >
-                          Approve
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            updatePaymentStatus(
-                              payment.id,
-                              'FAILED',
-                            )
-                          }
-                          className="rounded-xl bg-red-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-red-600"
-                        >
-                          Reject
-                        </button>
-                      </div>
+                      ).toLocaleDateString(
+                        'id-ID',
+                      )}
                     </td>
                   </tr>
                 ),
