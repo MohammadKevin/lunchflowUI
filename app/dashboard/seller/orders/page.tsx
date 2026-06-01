@@ -216,7 +216,7 @@ export default function SellerOrdersPage() {
       </div>
 
       {orders.length ===
-      0 ? (
+        0 ? (
         <div className="rounded-[32px] bg-white py-24 text-center shadow-sm">
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-orange-100 text-orange-500">
             <ShoppingBag className="h-12 w-12" />
@@ -359,77 +359,78 @@ export default function SellerOrdersPage() {
                     </h3>
                   </div>
 
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      onClick={() =>
-                        updateStatus(
-                          order.id,
-                          'CONFIRMED',
-                        )
-                      }
-                      className="flex items-center gap-2 rounded-2xl bg-blue-500 px-5 py-3 text-sm font-bold text-white transition hover:scale-[1.03]"
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
+                  {/* Ganti seluruh <div className="flex flex-wrap gap-3"> di bagian bawah setiap order card */}
 
-                      Confirm
-                    </button>
+                  {(() => {
+                    const isFinished =
+                      order.status === 'COMPLETED' ||
+                      order.status === 'CANCELLED'
 
-                    <button
-                      onClick={() =>
-                        updateStatus(
-                          order.id,
-                          'COOKING',
-                        )
-                      }
-                      className="flex items-center gap-2 rounded-2xl bg-orange-500 px-5 py-3 text-sm font-bold text-white transition hover:scale-[1.03]"
-                    >
-                      <CookingPot className="h-4 w-4" />
+                    if (isFinished) return null
 
-                      Cooking
-                    </button>
+                    const actions: {
+                      label: string
+                      status: string
+                      icon: React.ReactNode
+                      className: string
+                      show: boolean
+                    }[] = [
+                        {
+                          label: 'Confirm',
+                          status: 'CONFIRMED',
+                          icon: <CheckCircle2 className="h-4 w-4" />,
+                          className: 'bg-blue-500',
+                          show: order.status === 'PENDING',
+                        },
+                        {
+                          label: 'Cooking',
+                          status: 'COOKING',
+                          icon: <CookingPot className="h-4 w-4" />,
+                          className: 'bg-orange-500',
+                          show: order.status === 'CONFIRMED',
+                        },
+                        {
+                          label: 'Ready',
+                          status: 'READY',
+                          icon: <Clock3 className="h-4 w-4" />,
+                          className: 'bg-green-500',
+                          show: order.status === 'COOKING',
+                        },
+                        {
+                          label: 'Complete',
+                          status: 'COMPLETED',
+                          icon: <PackageCheck className="h-4 w-4" />,
+                          className: 'bg-emerald-500',
+                          show: order.status === 'READY',
+                        },
+                        {
+                          label: 'Cancel',
+                          status: 'CANCELLED',
+                          icon: <XCircle className="h-4 w-4" />,
+                          className: 'bg-red-500',
+                          show: true, // selalu tampil selama belum selesai
+                        },
+                      ]
 
-                    <button
-                      onClick={() =>
-                        updateStatus(
-                          order.id,
-                          'READY',
-                        )
-                      }
-                      className="flex items-center gap-2 rounded-2xl bg-green-500 px-5 py-3 text-sm font-bold text-white transition hover:scale-[1.03]"
-                    >
-                      <Clock3 className="h-4 w-4" />
-
-                      Ready
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        updateStatus(
-                          order.id,
-                          'COMPLETED',
-                        )
-                      }
-                      className="flex items-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-bold text-white transition hover:scale-[1.03]"
-                    >
-                      <PackageCheck className="h-4 w-4" />
-
-                      Complete
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        updateStatus(
-                          order.id,
-                          'CANCELLED',
-                        )
-                      }
-                      className="flex items-center gap-2 rounded-2xl bg-red-500 px-5 py-3 text-sm font-bold text-white transition hover:scale-[1.03]"
-                    >
-                      <XCircle className="h-4 w-4" />
-
-                      Cancel
-                    </button>
-                  </div>
+                    return (
+                      <div className="flex flex-wrap gap-3">
+                        {actions
+                          .filter((a) => a.show)
+                          .map((a) => (
+                            <button
+                              key={a.status}
+                              onClick={() =>
+                                updateStatus(order.id, a.status)
+                              }
+                              className={`flex items-center gap-2 rounded-2xl ${a.className} px-5 py-3 text-sm font-bold text-white transition hover:scale-[1.03]`}
+                            >
+                              {a.icon}
+                              {a.label}
+                            </button>
+                          ))}
+                      </div>
+                    )
+                  })()}
                 </div>
               </div>
             ),

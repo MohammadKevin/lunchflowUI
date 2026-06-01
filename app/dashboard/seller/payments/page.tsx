@@ -220,49 +220,38 @@ export default function SellerPaymentsPage() {
                   <h3 className="font-semibold text-gray-900">
                     {payment.paidAt
                       ? new Date(
-                          payment.paidAt,
-                        ).toLocaleString()
+                        payment.paidAt,
+                      ).toLocaleString()
                       : '-'}
                   </h3>
                 </div>
 
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={() =>
-                      updatePaymentStatus(
-                        payment.id,
-                        'PAID',
-                      )
-                    }
-                    className="rounded-2xl bg-green-500 px-4 py-3 text-sm font-semibold text-white"
-                  >
-                    Mark Paid
-                  </button>
+                {payment.paymentStatus !== 'PAID' &&
+                  payment.paymentStatus !== 'FAILED' && (
+                    <div className="flex flex-wrap gap-3">
+                      {payment.paymentStatus === 'UNPAID' && (
+                        <>
+                          <button
+                            onClick={() =>
+                              updatePaymentStatus(payment.id, 'PAID')
+                            }
+                            className="rounded-2xl bg-green-500 px-4 py-3 text-sm font-semibold text-white"
+                          >
+                            Mark Paid
+                          </button>
 
-                  <button
-                    onClick={() =>
-                      updatePaymentStatus(
-                        payment.id,
-                        'FAILED',
-                      )
-                    }
-                    className="rounded-2xl bg-red-500 px-4 py-3 text-sm font-semibold text-white"
-                  >
-                    Mark Failed
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      updatePaymentStatus(
-                        payment.id,
-                        'UNPAID',
-                      )
-                    }
-                    className="rounded-2xl bg-yellow-500 px-4 py-3 text-sm font-semibold text-white"
-                  >
-                    Mark Unpaid
-                  </button>
-                </div>
+                          <button
+                            onClick={() =>
+                              updatePaymentStatus(payment.id, 'FAILED')
+                            }
+                            className="rounded-2xl bg-red-500 px-4 py-3 text-sm font-semibold text-white"
+                          >
+                            Mark Failed
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
               </div>
 
               <div>
@@ -290,16 +279,16 @@ export default function SellerPaymentsPage() {
 
         {payments.length ===
           0 && (
-          <div className="rounded-3xl bg-white py-20 text-center shadow-sm">
-            <h2 className="text-2xl font-black text-gray-900">
-              No Payments Yet
-            </h2>
+            <div className="rounded-3xl bg-white py-20 text-center shadow-sm">
+              <h2 className="text-2xl font-black text-gray-900">
+                No Payments Yet
+              </h2>
 
-            <p className="mt-2 text-gray-500">
-              Customer payments will appear here.
-            </p>
-          </div>
-        )}
+              <p className="mt-2 text-gray-500">
+                Customer payments will appear here.
+              </p>
+            </div>
+          )}
       </div>
     </div>
   )
