@@ -43,12 +43,14 @@ export default function CheckoutPage() {
   const [
     loading,
     setLoading,
-  ] = useState(false)
+  ] =
+    useState(false)
 
   const [
     showQris,
     setShowQris,
-  ] = useState(false)
+  ] =
+    useState(false)
 
   const [
     paymentProof,
@@ -61,33 +63,40 @@ export default function CheckoutPage() {
   const [
     cartItems,
     setCartItems,
-  ] = useState<CartItem[]>(
-    [],
-  )
+  ] =
+    useState<CartItem[]>([])
 
   const [
     deliveryAddress,
     setDeliveryAddress,
-  ] = useState('')
+  ] =
+    useState('')
 
   const [
     notes,
     setNotes,
-  ] = useState('')
+  ] =
+    useState('')
 
   const [
     paymentMethod,
     setPaymentMethod,
-  ] = useState<
-    'CASH' | 'QRIS'
-  >('CASH')
+  ] =
+    useState<
+      'CASH' |
+      'QRIS'
+    >('CASH')
 
   const [
     orderType,
     setOrderType,
-  ] = useState<
-    'DELIVERY' | 'PICKUP'
-  >('DELIVERY')
+  ] =
+    useState<
+      'DELIVERY' |
+      'PICKUP'
+    >(
+      'DELIVERY',
+    )
 
   useEffect(() => {
     fetchCart()
@@ -102,8 +111,9 @@ export default function CheckoutPage() {
           )
 
         setCartItems(
-          res.data.items ||
-            [],
+          res.data
+            .items ||
+          [],
         )
       } catch {
         toast.error(
@@ -120,38 +130,38 @@ export default function CheckoutPage() {
       ) =>
         total +
         item.menu.price *
-          item.quantity,
+        item.quantity,
       0,
     )
 
   const createOrder =
     async () => {
       try {
-        setLoading(true)
-
-        const payload = {
-          sellerId:
-            cartItems[0]
-              .menu
-              .sellerId,
-
-          orderType,
-
-          paymentMethod,
-
-          deliveryAddress:
-            orderType ===
-            'DELIVERY'
-              ? deliveryAddress
-              : undefined,
-
-          notes,
-        }
+        setLoading(
+          true,
+        )
 
         const order =
           await api.post(
             '/orders',
-            payload,
+            {
+              sellerId:
+                cartItems[0]
+                  .menu
+                  .sellerId,
+
+              orderType,
+
+              paymentMethod,
+
+              notes,
+
+              deliveryAddress:
+                orderType ===
+                  'DELIVERY'
+                  ? deliveryAddress
+                  : undefined,
+            },
           )
 
         if (
@@ -168,18 +178,6 @@ export default function CheckoutPage() {
             return
           }
 
-          const paymentId =
-            order.data
-              ?.payment?.id
-
-          if (
-            !paymentId
-          ) {
-            throw new Error(
-              'Payment ID not found',
-            )
-          }
-
           const form =
             new FormData()
 
@@ -189,10 +187,11 @@ export default function CheckoutPage() {
           )
 
           await api.patch(
-            `/payments/${paymentId}/upload-proof`,
+            `/payments/${order.data.payment.id}/upload-proof`,
             form,
             {
-              headers: {
+              headers:
+              {
                 'Content-Type':
                   'multipart/form-data',
               },
@@ -205,52 +204,55 @@ export default function CheckoutPage() {
         )
 
         toast.success(
-          'Order created successfully',
+          'Order berhasil dibuat',
         )
 
         router.push(
           '/dashboard/customer/orders',
         )
       } catch (
-        error: any
+      error: any
       ) {
-        console.log(
-          error,
-        )
-
         toast.error(
-          error.response
+          error
+            .response
             ?.data
             ?.message ||
-            error.message ||
-            'Failed create order',
+          'Gagal checkout',
         )
       } finally {
-        setLoading(false)
-        setShowQris(false)
+        setLoading(
+          false,
+        )
+
+        setShowQris(
+          false,
+        )
       }
     }
 
-  const handlePlaceOrder =
+  const handleCheckout =
     async () => {
       if (
         cartItems.length ===
         0
       ) {
         toast.error(
-          'Cart is empty',
+          'Cart kosong',
         )
+
         return
       }
 
       if (
         orderType ===
-          'DELIVERY' &&
+        'DELIVERY' &&
         !deliveryAddress
       ) {
         toast.error(
-          'Delivery address required',
+          'Alamat wajib',
         )
+
         return
       }
 
@@ -270,93 +272,257 @@ export default function CheckoutPage() {
 
   return (
     <>
-      <button
-        onClick={
-          handlePlaceOrder
-        }
-      >
-        Place Order
-      </button>
+
+      <div className="mx-auto max-w-7xl grid gap-6 lg:grid-cols-[1fr_420px]">
+
+        <div className="space-y-6">
+
+          <div className="rounded-3xl bg-white p-6">
+
+            <h2 className="mb-5 text-3xl font-black">
+              Order Type
+            </h2>
+
+            <div className="grid md:grid-cols-2 gap-4">
+
+              <button
+                onClick={() =>
+                  setOrderType(
+                    'DELIVERY'
+                  )}
+                className={`rounded-3xl border p-6 ${orderType === 'DELIVERY'
+                    ? 'border-orange-500'
+                    : ''
+                  }`}
+              >
+                <Truck />
+                Delivery
+              </button>
+
+              <button
+                onClick={() =>
+                  setOrderType(
+                    'PICKUP'
+                  )}
+                className={`rounded-3xl border p-6 ${orderType === 'PICKUP'
+                    ? 'border-orange-500'
+                    : ''
+                  }`}
+              >
+                <Store />
+                Pickup
+              </button>
+
+            </div>
+
+          </div>
+
+          {orderType === 'DELIVERY' && (
+
+            <div className="rounded-3xl bg-white p-6">
+
+              <h2 className="mb-4 text-3xl font-black">
+                Alamat
+              </h2>
+
+              <textarea
+                value={
+                  deliveryAddress
+                }
+                onChange={(e) =>
+                  setDeliveryAddress(
+                    e.target.value
+                  )}
+                className="w-full rounded-3xl border p-4 h-40"
+              />
+
+            </div>
+
+          )}
+
+          <div className="rounded-3xl bg-white p-6">
+
+            <h2 className="mb-4 text-3xl font-black">
+              Pembayaran
+            </h2>
+
+            <div className="space-y-3">
+
+              <button
+                onClick={() =>
+                  setPaymentMethod(
+                    'CASH'
+                  )}
+                className="w-full rounded-xl border p-4"
+              >
+                Cash
+              </button>
+
+              <button
+                onClick={() =>
+                  setPaymentMethod(
+                    'QRIS'
+                  )}
+                className="w-full rounded-xl border p-4"
+              >
+                QRIS
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div className="rounded-3xl bg-white p-6">
+
+          <h2 className="text-3xl font-black">
+            Order Summary
+          </h2>
+
+          <div className="mt-6 space-y-4">
+
+            {cartItems.map(
+              (item) => (
+
+                <div
+                  key={item.id}
+                  className="flex gap-4"
+                >
+
+                  <Image
+                    src={
+                      item.menu.image
+                    }
+                    alt=""
+                    width={80}
+                    height={80}
+                    unoptimized
+                    className="rounded-2xl"
+                  />
+
+                  <div>
+
+                    <h3>
+                      {
+                        item.menu.name
+                      }
+                    </h3>
+
+                    <p>
+                      Qty {
+                        item.quantity
+                      }
+                    </p>
+
+                  </div>
+
+                </div>
+
+              )
+            )}
+
+          </div>
+
+          <div className="mt-8">
+
+            <h2 className="text-5xl font-black text-orange-500">
+
+              Rp {
+                totalPrice.toLocaleString()
+              }
+
+            </h2>
+
+          </div>
+
+          <button
+            onClick={
+              handleCheckout
+            }
+            disabled={
+              loading
+            }
+            className="mt-8 h-16 w-full rounded-3xl bg-orange-500 text-white"
+          >
+
+            {
+              loading
+                ?
+                <Loader2 className="animate-spin" />
+                :
+                'Place Order'
+            }
+
+          </button>
+
+        </div>
+
+      </div>
 
       {showQris && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 
-          <div className="w-full max-w-md rounded-3xl bg-white p-6">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
+
+          <div className="bg-white rounded-3xl p-6 w-[420px]">
 
             <div className="flex justify-between">
 
               <h2 className="text-3xl font-black">
-                QRIS Payment
+                QRIS
               </h2>
 
               <button
                 onClick={() =>
                   setShowQris(
-                    false,
-                  )
-                }
+                    false
+                  )}
               >
+
                 <X />
+
               </button>
 
             </div>
 
-            <div className="mt-6">
+            <Image
+              src="/qris.jpeg"
+              alt=""
+              width={500}
+              height={700}
+            />
 
-              <Image
-                src="/qris.jpeg"
-                alt="QRIS"
-                width={500}
-                height={700}
-                className="rounded-3xl"
-              />
-
-            </div>
-
-            <div className="mt-5">
-
-              <label>
-                Upload Bukti
-              </label>
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(
-                  e,
-                ) =>
-                  setPaymentProof(
-                    e
-                      .target
-                      .files?.[0] ||
-                      null,
-                  )
-                }
-                className="mt-2 w-full rounded-xl border p-3"
-              />
-
-            </div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) =>
+                setPaymentProof(
+                  e.target.files?.[0]
+                  ||
+                  null
+                )
+              }
+              className="mt-5"
+            />
 
             <button
               onClick={
                 createOrder
               }
-              disabled={
-                loading
-              }
-              className="mt-6 w-full rounded-3xl bg-orange-500 p-4 text-white"
+              className="mt-6 h-14 w-full rounded-3xl bg-orange-500 text-white"
             >
-              {loading ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                'I Have Paid'
-              )}
+
+              I Have Paid
+
             </button>
 
           </div>
 
         </div>
+
       )}
+
     </>
+
   )
 }
