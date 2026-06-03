@@ -61,46 +61,105 @@ export default function CheckoutPage() {
   )
 
   const createOrder = async () => {
-    try {
-      setLoading(true)
-      const order = await api.post('/orders', {
-        sellerId: cartItems[0].menu.sellerId,
-        orderType,
-        paymentMethod,
-        notes,
-        deliveryAddress: orderType === 'DELIVERY' ? deliveryAddress : undefined,
-      })
+  try {
+    setLoading(true)
 
-      if (paymentMethod === 'QRIS') {
-        if (!paymentProof) {
-          toast.error('Upload bukti pembayaran')
-          return
-        }
+    const order =
+      await api.post(
+        '/orders',
+        {
+          sellerId:
+            cartItems[0]
+              .menu
+              .sellerId,
 
-        const form = new FormData()
-        form.append('paymentProof', paymentProof)
+          orderType,
 
-        await api.patch(
-          `/payments/${order.data.payment.id}/upload-proof`,
-          form,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          },
+          paymentMethod,
+
+          notes,
+
+          deliveryAddress:
+            orderType ===
+            'DELIVERY'
+              ? deliveryAddress
+              : undefined,
+        },
+      )
+
+    console.log(
+      'ORDER RESPONSE',
+      order.data,
+    )
+
+    if (
+      paymentMethod ===
+      'QRIS'
+    ) {
+      if (
+        !paymentProof
+      ) {
+        toast.error(
+          'Upload bukti pembayaran',
+        )
+        return
+      }
+
+      const paymentId =
+        order.data?.payment?.id
+
+      if (
+        !paymentId
+      ) {
+        throw new Error(
+          'payment.id tidak ditemukan dari response /orders',
         )
       }
 
-      await api.delete('/cart')
-      toast.success('Order berhasil dibuat')
-      router.push('/dashboard/customer/orders')
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Gagal checkout')
-    } finally {
-      setLoading(false)
-      setShowQris(false)
+      const form =
+        new FormData()
+
+      form.append(
+        'paymentProof',
+        paymentProof,
+      )
+
+      await api.patch(
+        `/payments/${paymentId}/upload-proof`,
+        form,
+      )
     }
+
+    await api.delete(
+      '/cart',
+    )
+
+    toast.success(
+      'Order berhasil dibuat',
+    )
+
+    router.push(
+      '/dashboard/customer/orders',
+    )
+  } catch (
+    error: any
+  ) {
+    console.log(
+      'CHECKOUT ERROR',
+      error,
+    )
+
+    toast.error(
+      error.response
+        ?.data
+        ?.message ||
+        error.message ||
+        'Gagal checkout',
+    )
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
