@@ -36,6 +36,9 @@ export default function MenuDetailPage({
   const [loading, setLoading] = useState(true)
   const [cartLoading, setCartLoading] = useState(false)
 
+  // Hitung total harga secara dinamis berdasarkan kuantitas
+  const totalPrice = menu ? menu.price * quantity : 0
+
   useEffect(() => {
     const fetchMenu = async () => {
       try {
@@ -61,6 +64,7 @@ export default function MenuDetailPage({
       await api.post('/cart', {
         menuId: menu.id,
         quantity,
+        // totalPrice, // Buka komen ini jika backend kamu membutuhkan payload total harga
       })
 
       toast.success('Added to cart')
@@ -151,9 +155,12 @@ export default function MenuDetailPage({
 
           {/* Price & Quantity Selector */}
           <div className="mt-auto pt-8 flex flex-wrap items-center justify-between gap-4">
-            <h2 className="text-4xl font-black text-orange-500 md:text-5xl">
-              Rp {Number(menu.price).toLocaleString('id-ID')}
-            </h2>
+            <div>
+              <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">Total Price</p>
+              <h2 className="text-4xl font-black text-orange-500 md:text-5xl">
+                Rp {Number(totalPrice).toLocaleString('id-ID')}
+              </h2>
+            </div>
 
             <div className="flex items-center gap-4">
               <button
