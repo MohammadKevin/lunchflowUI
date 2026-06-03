@@ -61,105 +61,114 @@ export default function CheckoutPage() {
   )
 
   const createOrder = async () => {
-  try {
-    setLoading(true)
+    try {
+      setLoading(true)
 
-    const order =
-      await api.post(
-        '/orders',
-        {
-          sellerId:
-            cartItems[0]
-              .menu
-              .sellerId,
+      const response =
+        await api.post(
+          '/orders',
+          {
+            sellerId:
+              cartItems[0]
+                .menu
+                .sellerId,
 
-          orderType,
+            orderType,
 
-          paymentMethod,
+            paymentMethod,
 
-          notes,
+            notes,
 
-          deliveryAddress:
-            orderType ===
-            'DELIVERY'
-              ? deliveryAddress
-              : undefined,
-        },
-      )
-
-    console.log(
-      'ORDER RESPONSE',
-      order.data,
-    )
-
-    if (
-      paymentMethod ===
-      'QRIS'
-    ) {
-      if (
-        !paymentProof
-      ) {
-        toast.error(
-          'Upload bukti pembayaran',
+            deliveryAddress:
+              orderType ===
+                'DELIVERY'
+                ? deliveryAddress
+                : undefined,
+          },
         )
-        return
-      }
 
-      const paymentId =
-        order.data?.payment?.id
+      console.log(
+        'ORDER RESPONSE',
+        response.data,
+      )
 
       if (
-        !paymentId
+        paymentMethod ===
+        'QRIS'
       ) {
-        throw new Error(
-          'payment.id tidak ditemukan dari response /orders',
+        if (
+          !paymentProof
+        ) {
+          toast.error(
+            'Upload bukti pembayaran',
+          )
+
+          return
+        }
+
+        const paymentId =
+          response.data
+            ?.order
+            ?.payment
+            ?.id
+
+        if (
+          !paymentId
+        ) {
+          throw new Error(
+            'Payment ID tidak ditemukan',
+          )
+        }
+
+        const formData =
+          new FormData()
+
+        formData.append(
+          'paymentProof',
+          paymentProof,
+        )
+
+        await api.patch(
+          `/payments/${paymentId}/upload-proof`,
+          formData,
+          {
+            headers: {
+              'Content-Type':
+                'multipart/form-data',
+            },
+          },
         )
       }
 
-      const form =
-        new FormData()
-
-      form.append(
-        'paymentProof',
-        paymentProof,
+      await api.delete(
+        '/cart',
       )
 
-      await api.patch(
-        `/payments/${paymentId}/upload-proof`,
-        form,
+      toast.success(
+        'Order berhasil dibuat',
       )
-    }
 
-    await api.delete(
-      '/cart',
-    )
-
-    toast.success(
-      'Order berhasil dibuat',
-    )
-
-    router.push(
-      '/dashboard/customer/orders',
-    )
-  } catch (
+      router.push(
+        '/dashboard/customer/orders',
+      )
+    } catch (
     error: any
-  ) {
-    console.log(
-      'CHECKOUT ERROR',
-      error,
-    )
+    ) {
+      console.log(
+        error,
+      )
 
-    toast.error(
-      error.response
-        ?.data
-        ?.message ||
+      toast.error(
+        error.response
+          ?.data
+          ?.message ||
         error.message ||
         'Gagal checkout',
-    )
-  } finally {
-    setLoading(false)
+      )
+    } finally {
+      setLoading(false)
+    }
   }
-}
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
@@ -183,7 +192,7 @@ export default function CheckoutPage() {
   return (
     <>
       <div className="mx-auto max-w-7xl grid gap-6 lg:grid-cols-[1fr_420px] p-4 lg:p-8 min-h-screen bg-gray-50">
-        
+
         {/* LEFT COLUMN: Form Options */}
         <div className="space-y-6">
           {/* Order Type Section */}
@@ -192,11 +201,10 @@ export default function CheckoutPage() {
             <div className="grid md:grid-cols-2 gap-4">
               <button
                 onClick={() => setOrderType('DELIVERY')}
-                className={`flex flex-col items-center justify-center gap-3 rounded-2xl border-2 p-5 transition-all duration-200 ${
-                  orderType === 'DELIVERY'
+                className={`flex flex-col items-center justify-center gap-3 rounded-2xl border-2 p-5 transition-all duration-200 ${orderType === 'DELIVERY'
                     ? 'border-orange-500 bg-orange-50/50 text-orange-600 font-semibold'
                     : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                }`}
+                  }`}
               >
                 <Truck className="h-6 w-6" />
                 <span>Delivery</span>
@@ -204,11 +212,10 @@ export default function CheckoutPage() {
 
               <button
                 onClick={() => setOrderType('PICKUP')}
-                className={`flex flex-col items-center justify-center gap-3 rounded-2xl border-2 p-5 transition-all duration-200 ${
-                  orderType === 'PICKUP'
+                className={`flex flex-col items-center justify-center gap-3 rounded-2xl border-2 p-5 transition-all duration-200 ${orderType === 'PICKUP'
                     ? 'border-orange-500 bg-orange-50/50 text-orange-600 font-semibold'
                     : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                }`}
+                  }`}
               >
                 <Store className="h-6 w-6" />
                 <span>Pickup</span>
@@ -249,11 +256,10 @@ export default function CheckoutPage() {
             <div className="grid sm:grid-cols-2 gap-3">
               <button
                 onClick={() => setPaymentMethod('CASH')}
-                className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-all duration-200 ${
-                  paymentMethod === 'CASH'
+                className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-all duration-200 ${paymentMethod === 'CASH'
                     ? 'border-orange-500 bg-orange-50/50 text-orange-600 font-semibold'
                     : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                }`}
+                  }`}
               >
                 <Banknote className="h-5 w-5" />
                 <span>Tunai (Cash)</span>
@@ -261,11 +267,10 @@ export default function CheckoutPage() {
 
               <button
                 onClick={() => setPaymentMethod('QRIS')}
-                className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-all duration-200 ${
-                  paymentMethod === 'QRIS'
+                className={`flex items-center gap-3 rounded-xl border-2 p-4 transition-all duration-200 ${paymentMethod === 'QRIS'
                     ? 'border-orange-500 bg-orange-50/50 text-orange-600 font-semibold'
                     : 'border-gray-200 hover:border-gray-300 text-gray-600'
-                }`}
+                  }`}
               >
                 <span className="font-bold text-xs border border-current px-1.5 py-0.5 rounded">QRIS</span>
                 <span>QRIS Digital</span>
@@ -363,12 +368,11 @@ export default function CheckoutPage() {
               <label className="block text-sm font-medium text-gray-700">
                 Upload Bukti Pembayaran <span className="text-red-500">*</span>
               </label>
-              
-              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${
-                paymentProof 
-                  ? 'border-green-400 bg-green-50/30' 
+
+              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${paymentProof
+                  ? 'border-green-400 bg-green-50/30'
                   : 'border-gray-300 hover:border-orange-400 bg-gray-50 hover:bg-orange-50/10'
-              }`}>
+                }`}>
                 <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center">
                   {paymentProof ? (
                     <>
