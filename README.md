@@ -18,9 +18,9 @@ A polished and accessible frontend UI system engineered for lunch ordering, menu
 ---
 
 ## ✨ Key Features
-- ⚡ **Component-driven design with accessibility standards**: Component-driven design with accessibility standards
-- ⚡ **Interactive cart drawer and smooth checkout transition**: Interactive cart drawer and smooth checkout transition
-- ⚡ **Dark and light mode responsive styling**: Dark and light mode responsive styling
+- Component-driven design with accessibility standards
+- Interactive cart drawer and smooth checkout transition
+- Dark and light mode responsive styling
 
 ---
 
